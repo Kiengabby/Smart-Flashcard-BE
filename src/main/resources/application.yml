@@ -1,0 +1,115 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: elearning-service
+  
+  mvc:
+    path-match:
+      matching-strategy: ant_path_matcher
+  
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    date-format: yyyy-MM-dd HH:mm:ss
+
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+  http:
+    multipart:
+      enabled: true
+      max-file-size: 150MB
+      max-request-size: 150MB
+
+  tomcat:
+    max-wait: 20000
+    max-active: 50
+    max-idle: 20
+    min-idle: 15
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    format_sql: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://localhost:3306/elearning_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    hikari:
+      idle-timeout: 30000
+      maximum-pool-size: 500
+      minimum-idle: 5
+      pool-name: HikariPoolELearning
+
+logging:
+  level:
+    root: info
+    com.elearning.service: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/elearning-service.log
+  logback:
+    rollingpolicy:
+      max-history: 5
+      max-file-size: 200MB
+
+# JWT Configuration
+jwt:
+  secret-key: ELearningSecretKeyForGraduationProject2024StudentPortalSystemVerySecureKey
+  expiration: 86400000 # 24 hours in milliseconds
+  header: Authorization
+  prefix: Bearer
+
+# File Upload Configuration
+file:
+  upload:
+    directory: uploads/
+    max-size: 200MB
+
+# Cloudinary Configuration (Replace with your own credentials)
+cloudinary:
+  cloud-name: your-cloud-name
+  api-key: your-api-key
+  api-secret: your-api-secret
+
+# Google Cloud Storage Configuration (Replace with your own credentials)
+gcp:
+  storage:
+    bucket-name: your-bucket-name
+    project-id: your-project-id
+    credentials-path: path/to/your/service-account-key.json
+
+# CORS Configuration
+cors:
+  allowed-origins: 
+    - http://localhost:4200
+    - http://localhost:3000
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  allow-credentials: true
+
+# WebSocket Configuration
+websocket:
+  endpoint: /ws
+  allowed-origins: 
+    - http://localhost:4200
+    - http://localhost:3000

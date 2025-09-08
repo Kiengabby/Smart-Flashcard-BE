@@ -1,0 +1,82 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+.VSCodeCounter/
+
+### macOS ###
+.DS_Store
+
+### Logs ###
+logs/
+*.log
+
+### Database ###
+*.db
+*.sqlite
+
+### Environment Variables ###
+.env
+.env.local
+.env.production
+
+### Application Properties ###
+application-local.yml
+application-prod.yml
+application-dev.yml
+
+### IDE ###
+.metadata
+.recommenders
+
+### Maven ###
+dependency-reduced-pom.xml
+
+### Temp files ###
+tmp/
+temp/
+
+### Generated entities (JOOQ) ###
+/src/main/java/com/elearning/service/entities/
+
+### Upload files ###
+uploads/
+
+### Cloud credentials ###
+*.json
+gcp-credentials/
+cloudinary-config/
+
+### Security keys ###
+*.pem
+*.key
+*.crt
