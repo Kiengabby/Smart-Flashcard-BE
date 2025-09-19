@@ -67,4 +67,34 @@ public class CardService {
         cardDTO.setBackText(card.getBackText());
         return cardDTO;
     }
+
+    private Card getAndVerifyCardOwnership(Long cardId) {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thẻ với ID: " + cardId));
+        
+        // Kiểm tra quyền sở hữu thông qua Deck
+        if (!card.getDeck().getUser().getEmail().equals(currentUserEmail)) {
+            throw new AccessDeniedException("Bạn không có quyền truy cập thẻ này");
+        }
+        
+        return card;
+    }
+
+    public CardDTO updateCard(Long cardId, CreateCardDTO cardDetails) {
+        Card card = getAndVerifyCardOwnership(cardId);
+        
+        card.setFrontText(cardDetails.getFrontText());
+        card.setBackText(cardDetails.getBackText());
+        
+        Card updatedCard = cardRepository.save(card);
+        
+        return mapToCardDTO(updatedCard);
+    }
+
+    public void deleteCard(Long cardId) {
+        getAndVerifyCardOwnership(cardId);
+        cardRepository.deleteById(cardId);
+    }
 }

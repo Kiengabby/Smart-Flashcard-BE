@@ -28,4 +28,18 @@ public class DeckController {
         DeckDTO createdDeck = deckService.createDeck(createDeckDTO);
         return ResponseEntity.ok(createdDeck);
     }
+
+    @PutMapping("/{deckId}")
+    public ResponseEntity<DeckDTO> updateDeck(
+            @PathVariable Long deckId, 
+            @RequestBody @Valid CreateDeckDTO deckDetails) {
+        DeckDTO updatedDeck = deckService.updateDeck(deckId, deckDetails);
+        return ResponseEntity.ok(updatedDeck);
+    }
+
+    @DeleteMapping("/{deckId}")
+    public ResponseEntity<Void> deleteDeck(@PathVariable Long deckId) {
+        deckService.deleteDeck(deckId);
+        return ResponseEntity.noContent().build();
+    }
 }

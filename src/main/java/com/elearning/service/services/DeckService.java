@@ -8,6 +8,7 @@ import com.elearning.service.repositories.DeckRepository;
 import com.elearning.service.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -50,5 +51,34 @@ public class DeckService {
         Deck savedDeck = deckRepository.save(deck);
         
         return modelMapper.map(savedDeck, DeckDTO.class);
+    }
+
+    private Deck getAndVerifyDeckOwnership(Long deckId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new RuntimeException("Deck not found with id: " + deckId));
+        
+        if (!deck.getUser().getEmail().equals(email)) {
+            throw new AccessDeniedException("Bạn không có quyền truy cập bộ thẻ này");
+        }
+        
+        return deck;
+    }
+
+    public DeckDTO updateDeck(Long deckId, CreateDeckDTO deckDetails) {
+        Deck deck = getAndVerifyDeckOwnership(deckId);
+        
+        deck.setName(deckDetails.getName());
+        deck.setDescription(deckDetails.getDescription());
+        
+        Deck updatedDeck = deckRepository.save(deck);
+        
+        return modelMapper.map(updatedDeck, DeckDTO.class);
+    }
+
+    public void deleteDeck(Long deckId) {
+        getAndVerifyDeckOwnership(deckId);
+        deckRepository.deleteById(deckId);
     }
 }

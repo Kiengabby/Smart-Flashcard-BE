@@ -30,4 +30,21 @@ public class CardController {
         List<CardDTO> cards = cardService.getCardsByDeck(deckId);
         return ResponseEntity.ok(cards);
     }
+
+    @PutMapping("/{cardId}")
+    public ResponseEntity<CardDTO> updateCard(
+            @PathVariable Long deckId,
+            @PathVariable Long cardId,
+            @RequestBody @Valid CreateCardDTO cardDetails) {
+        CardDTO updatedCard = cardService.updateCard(cardId, cardDetails);
+        return ResponseEntity.ok(updatedCard);
+    }
+
+    @DeleteMapping("/{cardId}")
+    public ResponseEntity<Void> deleteCard(
+            @PathVariable Long deckId,
+            @PathVariable Long cardId) {
+        cardService.deleteCard(cardId);
+        return ResponseEntity.noContent().build();
+    }
 }
