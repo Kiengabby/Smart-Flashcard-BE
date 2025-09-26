@@ -6,8 +6,8 @@
 
 ## Công nghệ sử dụng
 
-- **Backend Framework**: Spring Boot 3.0.13
-- **Language**: Java 17
+- **Backend Framework**: Spring Boot 3.3.5
+- **Language**: Java 21 (LTS)
 - **Database**: MySQL 8.0+
 - **ORM**: Hibernate JPA + JOOQ
 - **Security**: Spring Security + JWT
@@ -34,6 +34,13 @@
 - Hệ thống chấm điểm tự động
 - Theo dõi tiến độ học tập
 - Phân tích và báo cáo kết quả
+
+### 🧠 Hệ thống ôn tập thông minh (SM-2)
+- **Thuật toán Spaced Repetition SM-2** tối ưu hóa việc ghi nhớ
+- Tự động tính toán lịch ôn tập dựa trên khả năng ghi nhớ cá nhân
+- Adaptive learning - thích ứng với tốc độ học của từng người
+- Theo dõi tiến độ học tập và thống kê chi tiết
+- API RESTful cho tích hợp frontend và mobile
 
 ### 💬 Giao tiếp tương tác
 - Chat real-time giữa học viên và giảng viên
