@@ -33,8 +33,8 @@ public class CardService {
         }
         
         Card card = new Card();
-        card.setFrontText(createCardDTO.getFrontText());
-        card.setBackText(createCardDTO.getBackText());
+        card.setFront(createCardDTO.getFrontText());
+        card.setBack(createCardDTO.getBackText());
         card.setDeck(deck);
         
         Card savedCard = cardRepository.save(card);
@@ -63,8 +63,8 @@ public class CardService {
     private CardDTO mapToCardDTO(Card card) {
         CardDTO cardDTO = new CardDTO();
         cardDTO.setId(card.getId());
-        cardDTO.setFrontText(card.getFrontText());
-        cardDTO.setBackText(card.getBackText());
+        cardDTO.setFrontText(card.getFront());
+        cardDTO.setBackText(card.getBack());
         return cardDTO;
     }
 
@@ -85,8 +85,8 @@ public class CardService {
     public CardDTO updateCard(Long cardId, CreateCardDTO cardDetails) {
         Card card = getAndVerifyCardOwnership(cardId);
         
-        card.setFrontText(cardDetails.getFrontText());
-        card.setBackText(cardDetails.getBackText());
+        card.setFront(cardDetails.getFrontText());
+        card.setBack(cardDetails.getBackText());
         
         Card updatedCard = cardRepository.save(card);
         

@@ -5,14 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * DTO chứa thông tin thẻ dành cho việc ôn tập
  * Bao gồm cả nội dung thẻ và thông tin trạng thái học tập
  * 
  * @author Smart Flashcard Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 @Data
 @NoArgsConstructor
@@ -30,7 +30,7 @@ public class ReviewCardDTO {
     private Integer repetitions;
     private Double easinessFactor;
     private Integer interval;
-    private Date nextReviewDate;
+    private LocalDate nextReviewDate;
     
     // Thông tin bổ sung
     private Boolean isNewCard;       // Thẻ mới chưa học lần nào

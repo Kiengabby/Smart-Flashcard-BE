@@ -22,8 +22,20 @@ public class DeckController {
         List<DeckDTO> decks = deckService.getDecksByCurrentUser();
         return ResponseEntity.ok(decks);
     }
+    
+    @GetMapping("/")
+    public ResponseEntity<List<DeckDTO>> getDecksForUser() {
+        List<DeckDTO> decks = deckService.getDecksForCurrentUser();
+        return ResponseEntity.ok(decks);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<DeckDTO> getDeckById(@PathVariable Long id) {
+        DeckDTO deck = deckService.getDeckById(id);
+        return ResponseEntity.ok(deck);
+    }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<DeckDTO> createDeck(@RequestBody @Valid CreateDeckDTO createDeckDTO) {
         DeckDTO createdDeck = deckService.createDeck(createDeckDTO);
         return ResponseEntity.ok(createdDeck);
@@ -37,9 +49,9 @@ public class DeckController {
         return ResponseEntity.ok(updatedDeck);
     }
 
-    @DeleteMapping("/{deckId}")
-    public ResponseEntity<Void> deleteDeck(@PathVariable Long deckId) {
-        deckService.deleteDeck(deckId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDeck(@PathVariable Long id) {
+        deckService.deleteDeck(id);
         return ResponseEntity.noContent().build();
     }
 }

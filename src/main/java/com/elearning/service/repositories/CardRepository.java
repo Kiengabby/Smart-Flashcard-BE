@@ -4,7 +4,7 @@ import com.elearning.service.entities.Card;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -15,7 +15,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     /**
      * Tìm tất cả thẻ cần ôn tập (nextReviewDate trước hoặc bằng ngày hiện tại)
      */
-    List<Card> findAllByDeckIdAndNextReviewDateBefore(Long deckId, Date today);
+    List<Card> findAllByDeckIdAndNextReviewDateLessThanEqual(Long deckId, LocalDate today);
     
     /**
      * Tìm tất cả thẻ mới (chưa có nextReviewDate)

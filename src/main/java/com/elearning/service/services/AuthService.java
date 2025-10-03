@@ -41,7 +41,7 @@ public class AuthService {
         User user = new User();
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        user.setFullName(registerDto.getFullName());
+        user.setDisplayName(registerDto.getFullName());
 
         userRepository.save(user);
         return "User registered successfully!";
@@ -60,6 +60,6 @@ public class AuthService {
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new AuthResponseDTO(jwt, user.getId(), user.getEmail(), user.getFullName());
+        return new AuthResponseDTO(jwt, user.getId(), user.getEmail(), user.getDisplayName());
     }
 }
