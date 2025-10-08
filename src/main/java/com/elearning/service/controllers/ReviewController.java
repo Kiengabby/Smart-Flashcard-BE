@@ -4,92 +4,132 @@ import com.elearning.service.dtos.AnswerDTO;
 import com.elearning.service.dtos.CardDTO;
 import com.elearning.service.dtos.ReviewStatsDTO;
 import com.elearning.service.dtos.base.ResponseDTO;
-import com.elearning.service.entities.Card;
 import com.elearning.service.services.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Controller xử lý các API liên quan đến ôn tập thẻ
+ * REST Controller xử lý các API liên quan đến ôn tập thẻ với thuật toán SM-2
  * 
  * @author Smart Flashcard Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/reviews")
+@RequestMapping("/api/v1/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final ModelMapper modelMapper;
 
     /**
-     * Lấy danh sách thẻ cần ôn tập trong một deck
+     * Lấy danh sách thẻ cần ôn tập hôm nay cho người dùng hiện tại
      * 
-     * @param deckId ID của deck
-     * @return Danh sách thẻ cần ôn tập
+     * @return ResponseEntity chứa danh sách CardDTO cần ôn tập
      */
-    @GetMapping("/due")
-    public ResponseEntity<ResponseDTO<List<CardDTO>>> getDueCards(@RequestParam Long deckId) {
-        log.info("Yêu cầu lấy thẻ cần ôn tập cho deck ID: {}", deckId);
+    @GetMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ResponseDTO<List<CardDTO>>> getTodayReviews() {
+        log.info("API: Lấy danh sách thẻ cần ôn tập hôm nay");
         
-        List<Card> dueCards = reviewService.getDueCards(deckId);
-        List<CardDTO> dueCardDTOs = dueCards.stream()
-                .map(card -> modelMapper.map(card, CardDTO.class))
-                .collect(Collectors.toList());
-                
-        ResponseDTO<List<CardDTO>> response = ResponseDTO.success("Lấy thẻ cần ôn tập thành công", dueCardDTOs);
-        
-        log.info("Trả về {} thẻ cần ôn tập cho deck ID: {}", dueCardDTOs.size(), deckId);
-        
-        return ResponseEntity.ok(response);
+        try {
+            List<CardDTO> reviewCards = reviewService.getReviewsForToday();
+            
+            ResponseDTO<List<CardDTO>> response = ResponseDTO.success(
+                "Lấy thẻ cần ôn tập thành công", 
+                reviewCards
+            );
+            
+            log.info("Trả về {} thẻ cần ôn tập", reviewCards.size());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy danh sách thẻ ôn tập: {}", e.getMessage(), e);
+            
+            ResponseDTO<List<CardDTO>> errorResponse = ResponseDTO.error(
+                "Lỗi khi lấy thẻ cần ôn tập: " + e.getMessage()
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     /**
-     * Xử lý câu trả lời của người dùng cho một thẻ
+     * Gửi câu trả lời cho một thẻ và cập nhật tiến độ học tập
      * 
-     * @param answerDTO Thông tin câu trả lời
-     * @return Kết quả xử lý
+     * @param answerDTO DTO chứa cardId và quality (0-5)
+     * @return ResponseEntity xác nhận đã xử lý thành công
      */
-    @PostMapping("/answer")
-    public ResponseEntity<ResponseDTO<String>> answerCard(@RequestBody @Valid AnswerDTO answerDTO) {
-        log.info("Xử lý câu trả lời cho thẻ ID: {} với chất lượng: {}", 
+    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ResponseDTO<String>> submitAnswer(
+            @Valid @RequestBody AnswerDTO answerDTO) {
+        
+        log.info("API: Xử lý câu trả lời cho card ID: {}, quality: {}", 
                 answerDTO.getCardId(), answerDTO.getQuality());
         
-        reviewService.processAnswer(answerDTO);
-        
-        ResponseDTO<String> response = ResponseDTO.success("Xử lý câu trả lời thành công", "Thẻ đã được cập nhật lịch ôn tập");
-        
-        log.info("Đã xử lý thành công câu trả lời cho thẻ ID: {}", answerDTO.getCardId());
-        
-        return ResponseEntity.ok(response);
+        try {
+            reviewService.submitAnswer(answerDTO);
+            
+            ResponseDTO<String> response = ResponseDTO.success(
+                "Câu trả lời đã được xử lý thành công",
+                "Tiến độ học tập đã được cập nhật theo thuật toán SM-2"
+            );
+            
+            log.info("Đã xử lý thành công câu trả lời cho card ID: {}", answerDTO.getCardId());
+            return ResponseEntity.ok(response);
+            
+        } catch (IllegalArgumentException e) {
+            log.warn("Dữ liệu đầu vào không hợp lệ: {}", e.getMessage());
+            
+            ResponseDTO<String> errorResponse = ResponseDTO.error(
+                "Dữ liệu không hợp lệ: " + e.getMessage()
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
+            
+        } catch (Exception e) {
+            log.error("Lỗi khi xử lý câu trả lời: {}", e.getMessage(), e);
+            
+            ResponseDTO<String> errorResponse = ResponseDTO.error(
+                "Lỗi hệ thống khi xử lý câu trả lời: " + e.getMessage()
+            );
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
     }
-    
+
     /**
-     * Lấy thống kê ôn tập của một deck
+     * Lấy thống kê ôn tập tổng quan cho người dùng hiện tại
      * 
-     * @param deckId ID của deck
-     * @return Thông tin thống kê ôn tập
+     * @return ResponseEntity chứa ReviewStatsDTO với thống kê ôn tập
      */
     @GetMapping("/stats")
-    public ResponseEntity<ResponseDTO<ReviewStatsDTO>> getReviewStats(@RequestParam Long deckId) {
-        log.info("Yêu cầu lấy thống kê ôn tập cho deck ID: {}", deckId);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ResponseDTO<ReviewStatsDTO>> getReviewStats() {
+        log.info("API: Lấy thống kê ôn tập cho user hiện tại");
         
-        ReviewStatsDTO stats = reviewService.getReviewStats(deckId);
-        
-        ResponseDTO<ReviewStatsDTO> response = ResponseDTO.success("Lấy thống kê ôn tập thành công", stats);
-        
-        log.info("Thống kê deck ID {}: {} thẻ tổng, {} thẻ mới, {} thẻ cần ôn", 
-                deckId, stats.getTotalCards(), stats.getNewCards(), stats.getDueCards());
-        
-        return ResponseEntity.ok(response);
+        try {
+            ReviewStatsDTO stats = reviewService.getReviewStats();
+            
+            ResponseDTO<ReviewStatsDTO> response = ResponseDTO.success(
+                "Lấy thống kê ôn tập thành công",
+                stats
+            );
+            
+            log.info("Trả về thống kê: {} thẻ cần ôn tập", stats.getDueCards());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy thống kê ôn tập: {}", e.getMessage(), e);
+            
+            ResponseDTO<ReviewStatsDTO> errorResponse = ResponseDTO.error(
+                "Lỗi khi lấy thống kê ôn tập: " + e.getMessage()
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 }
