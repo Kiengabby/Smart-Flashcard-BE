@@ -10,15 +10,24 @@ import lombok.NoArgsConstructor;
 public class AuthResponseDTO {
     
     private String token;
-    private String type = "Bearer";
-    private Long id;
-    private String email;
-    private String fullName;
+    private String refreshToken;
+    private UserInfo user;
+    private String message;
     
-    public AuthResponseDTO(String token, Long id, String email, String fullName) {
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserInfo {
+        private String id;
+        private String email;
+        private String displayName;
+        private String avatar;
+    }
+    
+    // Constructor for convenience (without refreshToken and avatar)
+    public AuthResponseDTO(String token, Long id, String email, String displayName, String message) {
         this.token = token;
-        this.id = id;
-        this.email = email;
-        this.fullName = fullName;
+        this.user = new UserInfo(id.toString(), email, displayName, null);
+        this.message = message;
     }
 }

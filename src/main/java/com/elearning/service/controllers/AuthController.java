@@ -21,8 +21,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterDTO registerDto) {
         try {
-            String result = authService.registerUser(registerDto);
-            return ResponseEntity.ok(result);
+            AuthResponseDTO response = authService.registerUser(registerDto);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

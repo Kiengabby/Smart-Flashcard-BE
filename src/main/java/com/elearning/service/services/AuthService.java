@@ -30,7 +30,7 @@ public class AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    public String registerUser(RegisterDTO registerDto) {
+    public AuthResponseDTO registerUser(RegisterDTO registerDto) {
         // Check if user already exists
         Optional<User> existingUser = userRepository.findByEmail(registerDto.getEmail());
         if (existingUser.isPresent()) {
@@ -41,10 +41,21 @@ public class AuthService {
         User user = new User();
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        user.setDisplayName(registerDto.getFullName());
+        user.setDisplayName(registerDto.getDisplayName());
 
         userRepository.save(user);
-        return "User registered successfully!";
+        
+        // Auto-login after registration by generating token
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        registerDto.getEmail(),
+                        registerDto.getPassword()
+                )
+        );
+        
+        String jwt = jwtTokenProvider.generateToken(authentication);
+        
+        return new AuthResponseDTO(jwt, user.getId(), user.getEmail(), user.getDisplayName(), "User registered successfully!");
     }
 
     public AuthResponseDTO authenticateUser(LoginDTO loginDto) {
@@ -60,6 +71,6 @@ public class AuthService {
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new AuthResponseDTO(jwt, user.getId(), user.getEmail(), user.getDisplayName());
+        return new AuthResponseDTO(jwt, user.getId(), user.getEmail(), user.getDisplayName(), "Login successful!");
     }
 }
