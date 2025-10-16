@@ -11,14 +11,4 @@ import java.util.List;
 public interface CardRepository extends JpaRepository<Card, Long> {
     
     List<Card> findAllByDeckId(Long deckId);
-    
-    /**
-     * Tìm tất cả thẻ cần ôn tập (nextReviewDate trước hoặc bằng ngày hiện tại)
-     */
-    List<Card> findAllByDeckIdAndNextReviewDateLessThanEqual(Long deckId, LocalDate today);
-    
-    /**
-     * Tìm tất cả thẻ mới (chưa có nextReviewDate)
-     */
-    List<Card> findAllByDeckIdAndNextReviewDateIsNull(Long deckId);
 }

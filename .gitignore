@@ -65,9 +65,6 @@ dependency-reduced-pom.xml
 tmp/
 temp/
 
-### Generated entities (JOOQ) ###
-/src/main/java/com/elearning/service/entities/
-
 ### Upload files ###
 uploads/
 
