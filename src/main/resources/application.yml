@@ -32,22 +32,31 @@ spring:
     max-idle: 20
     min-idle: 15
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    dialect: org.hibernate.dialect.MySQL8Dialect
-    show-sql: true
-    format_sql: true
-
+  # H2 Database Configuration (File-based for data persistence)
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://localhost:3306/elearning_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:./data/smartflashcard;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
     hikari:
       idle-timeout: 30000
-      maximum-pool-size: 500
+      maximum-pool-size: 10
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
       minimum-idle: 5
       pool-name: HikariPoolELearning
 

@@ -65,6 +65,11 @@ public class CardService {
         cardDTO.setId(card.getId());
         cardDTO.setFrontText(card.getFront());
         cardDTO.setBackText(card.getBack());
+        cardDTO.setRepetitions(card.getRepetitions());
+        cardDTO.setEasinessFactor(card.getEasinessFactor());
+        cardDTO.setInterval(card.getIntervalDays());
+        cardDTO.setNextReviewDate(card.getNextReviewDate() != null ? 
+            java.util.Date.from(card.getNextReviewDate().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()) : null);
         return cardDTO;
     }
 
