@@ -65,11 +65,14 @@ public class CardService {
         cardDTO.setId(card.getId());
         cardDTO.setFrontText(card.getFront());
         cardDTO.setBackText(card.getBack());
-        cardDTO.setRepetitions(card.getRepetitions());
-        cardDTO.setEasinessFactor(card.getEasinessFactor());
-        cardDTO.setInterval(card.getIntervalDays());
-        cardDTO.setNextReviewDate(card.getNextReviewDate() != null ? 
-            java.util.Date.from(card.getNextReviewDate().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()) : null);
+        
+        // Các trường spaced repetition sẽ được lấy từ UserCardProgress
+        // Tạm thời set giá trị mặc định
+        cardDTO.setRepetitions(0);
+        cardDTO.setEasinessFactor(2.5);
+        cardDTO.setInterval(0);
+        cardDTO.setNextReviewDate(null);
+        
         return cardDTO;
     }
 
