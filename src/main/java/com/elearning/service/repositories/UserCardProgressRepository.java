@@ -94,4 +94,42 @@ public interface UserCardProgressRepository extends JpaRepository<UserCardProgre
      * @param user User entity
      */
     void deleteByUser(User user);
+    
+    // Các method mới cho thống kê
+    
+    /**
+     * Đếm số thẻ cần ôn tập hôm nay (thay thế method phức tạp)
+     */
+    @Query("SELECT COUNT(ucp) FROM UserCardProgress ucp WHERE ucp.user = :user AND (ucp.nextReviewDate IS NULL OR ucp.nextReviewDate <= :date)")
+    long countByUserAndNextReviewDateLessThanEqual(@Param("user") User user, @Param("date") LocalDate date);
+    
+    /**
+     * Đếm số thẻ đã học trong ngày
+     */
+    @Query("SELECT COUNT(ucp) FROM UserCardProgress ucp WHERE ucp.user = :user AND ucp.lastReviewedDate = :date")
+    long countByUserAndLastReviewedDate(@Param("user") User user, @Param("date") LocalDate date);
+    
+    /**
+     * Tính streak hiện tại (đơn giản hóa - đếm số ngày có hoạt động gần đây)
+     */
+    @Query("SELECT COUNT(DISTINCT DATE(ucp.lastReviewedDate)) FROM UserCardProgress ucp WHERE ucp.user = :user AND ucp.lastReviewedDate >= :fromDate")
+    long countConsecutiveDaysWithReview(@Param("user") User user, @Param("fromDate") LocalDate fromDate);
+    
+    /**
+     * Tính điểm ease factor trung bình
+     */
+    @Query("SELECT AVG(ucp.easeFactor) FROM UserCardProgress ucp WHERE ucp.user = :user AND ucp.easeFactor IS NOT NULL")
+    Optional<Double> findAverageEaseFactorByUser(@Param("user") User user);
+    
+    /**
+     * Lấy các ngày riêng biệt có hoạt động học tập trong tháng
+     */
+    @Query("SELECT DISTINCT ucp.lastReviewedDate FROM UserCardProgress ucp WHERE ucp.user = :user AND ucp.lastReviewedDate BETWEEN :startDate AND :endDate AND ucp.lastReviewedDate IS NOT NULL ORDER BY ucp.lastReviewedDate")
+    List<LocalDate> findDistinctActivityDatesByUserInMonth(@Param("user") User user, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    
+    /**
+     * Lấy tất cả ngày riêng biệt có hoạt động học tập của user (để tính streak)
+     */
+    @Query("SELECT DISTINCT ucp.lastReviewedDate FROM UserCardProgress ucp WHERE ucp.user = :user AND ucp.lastReviewedDate IS NOT NULL ORDER BY ucp.lastReviewedDate")
+    List<LocalDate> findDistinctActivityDatesByUser(@Param("user") User user);
 }

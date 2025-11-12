@@ -140,6 +140,10 @@ public class QuizService {
         
         // Validate card ID
         List<Long> cardIds = convertFromJson(session.getCardIds(), new TypeReference<List<Long>>() {});
+        if (cardIds.isEmpty() || session.getCurrentQuestion() <= 0 || session.getCurrentQuestion() > cardIds.size()) {
+            throw new IllegalStateException("Dữ liệu session không hợp lệ");
+        }
+        
         Long currentCardId = cardIds.get(session.getCurrentQuestion() - 1);
         
         if (!currentCardId.equals(answerDTO.getCardId())) {
@@ -149,6 +153,17 @@ public class QuizService {
         // Lấy options và correct index từ session (đã được lưu khi tạo câu hỏi)
         List<String> currentOptions = convertFromJson(session.getCurrentOptions(), new TypeReference<List<String>>() {});
         Integer correctAnswerIndex = session.getCurrentCorrectAnswerIndex();
+        
+        if (currentOptions.isEmpty() || correctAnswerIndex == null || 
+            correctAnswerIndex < 0 || correctAnswerIndex >= currentOptions.size()) {
+            throw new IllegalStateException("Dữ liệu câu hỏi không hợp lệ");
+        }
+        
+        if (answerDTO.getSelectedAnswerIndex() == null || 
+            answerDTO.getSelectedAnswerIndex() < 0 || 
+            answerDTO.getSelectedAnswerIndex() >= currentOptions.size()) {
+            throw new IllegalArgumentException("Đáp án được chọn không hợp lệ");
+        }
         
         // Kiểm tra đáp án
         boolean isCorrect = answerDTO.getSelectedAnswerIndex().equals(correctAnswerIndex);
@@ -266,6 +281,11 @@ public class QuizService {
         // Tìm index của đáp án đúng sau khi xáo trộn
         int correctAnswerIndex = options.indexOf(correctAnswer);
         
+        // Lưu thông tin câu hỏi hiện tại vào session
+        session.setCurrentOptions(convertToJson(options));
+        session.setCurrentCorrectAnswerIndex(correctAnswerIndex);
+        quizSessionRepository.save(session);
+        
         return QuizQuestionDTO.builder()
                 .cardId(questionCard.getId())
                 .questionNumber(session.getCurrentQuestion())
@@ -353,10 +373,15 @@ public class QuizService {
      * Convert JSON string to object
      */
     private <T> T convertFromJson(String json, TypeReference<T> typeRef) {
+        if (json == null || json.trim().isEmpty()) {
+            log.warn("JSON string is null or empty, returning empty list");
+            return (T) new ArrayList<>();
+        }
+        
         try {
             return objectMapper.readValue(json, typeRef);
         } catch (JsonProcessingException e) {
-            log.error("Lỗi khi convert JSON to object", e);
+            log.error("Lỗi khi convert JSON to object: {}", json, e);
             return (T) new ArrayList<>(); // Return empty list as fallback
         }
     }
