@@ -336,4 +336,71 @@ public class CardService {
                 .map(java.time.LocalDate::getDayOfMonth)
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    /**
+     * Review một flashcard với quality score (SM-2 algorithm)
+     */
+    public CardDTO reviewCard(Long cardId, Integer quality) {
+        User currentUser = getCurrentUser();
+        
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thẻ với ID: " + cardId));
+        
+        // Kiểm tra quyền truy cập thẻ
+        if (!card.getDeck().getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Bạn không có quyền truy cập thẻ này");
+        }
+        
+        // Lấy hoặc tạo progress record
+        UserCardProgress progress = userCardProgressRepository.findByUserAndCard(currentUser, card)
+                .orElse(UserCardProgress.builder()
+                    .user(currentUser)
+                    .card(card)
+                    .easeFactor(2.5)
+                    .interval(0)
+                    .repetitions(0)
+                    .totalReviews(0)
+                    .correctReviews(0)
+                    .build());
+        
+        // Tính toán SM-2 algorithm
+        double easinessFactor = progress.getEaseFactor();
+        int repetitions = progress.getRepetitions();
+        int interval = progress.getInterval();
+        
+        if (quality >= 3) {
+            // Đáp án đúng
+            if (repetitions == 0) {
+                interval = 1;
+            } else if (repetitions == 1) {
+                interval = 6;
+            } else {
+                interval = Math.round((float)(interval * easinessFactor));
+            }
+            repetitions++;
+            progress.setCorrectReviews(progress.getCorrectReviews() + 1);
+        } else {
+            // Đáp án sai - reset repetitions
+            repetitions = 0;
+            interval = 1;
+        }
+        
+        // Cập nhật easiness factor
+        easinessFactor = easinessFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+        if (easinessFactor < 1.3) {
+            easinessFactor = 1.3;
+        }
+        
+        // Cập nhật progress record
+        progress.setEaseFactor(easinessFactor);
+        progress.setRepetitions(repetitions);
+        progress.setInterval(interval);
+        progress.setNextReviewDate(LocalDate.now().plusDays(interval));
+        progress.setLastReviewedDate(LocalDate.now());
+        progress.setTotalReviews(progress.getTotalReviews() + 1);
+        
+        userCardProgressRepository.save(progress);
+        
+        return mapToCardDTO(card);
+    }
 }

@@ -2,6 +2,7 @@ package com.elearning.service.controllers;
 
 import com.elearning.service.dtos.CardDTO;
 import com.elearning.service.dtos.CreateCardDTO;
+import com.elearning.service.dtos.ReviewCardRequest;
 import com.elearning.service.services.CardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +47,14 @@ public class CardController {
             @PathVariable Long cardId) {
         cardService.deleteCard(cardId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{cardId}/review")
+    public ResponseEntity<CardDTO> reviewCard(
+            @PathVariable Long deckId,
+            @PathVariable Long cardId,
+            @RequestBody ReviewCardRequest request) {
+        CardDTO updatedCard = cardService.reviewCard(cardId, request.getQuality());
+        return ResponseEntity.ok(updatedCard);
     }
 }

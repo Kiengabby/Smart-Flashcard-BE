@@ -4,8 +4,10 @@ server:
     context-path: /
 
 spring:
+  profiles:
+    active: mysql
   application:
-    name: elearning-service
+    name: smart-flashcard-service
   
   mvc:
     path-match:
@@ -20,22 +22,10 @@ spring:
       max-file-size: 200MB
       max-request-size: 200MB
 
-  http:
-    multipart:
-      enabled: true
-      max-file-size: 150MB
-      max-request-size: 150MB
-
-  tomcat:
-    max-wait: 20000
-    max-active: 50
-    max-idle: 20
-    min-idle: 15
-
   # MySQL Database Configuration (Production)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/smartflashcard_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/smart_flashcard?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
     username: root
     password: 123456
     hikari:
@@ -43,7 +33,9 @@ spring:
       maximum-pool-size: 20
       minimum-idle: 5
       connection-timeout: 20000
-      pool-name: HikariPoolELearning
+      pool-name: HikariPoolSmartFlashcard
+      connection-test-query: SELECT 1
+      validation-timeout: 3000
   
   # H2 Console disabled for MySQL
   h2:
@@ -54,10 +46,13 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
 
 logging:
   level:
