@@ -14,4 +14,6 @@ public class CreateDeckDTO {
     private String name;
     
     private String description;
+    
+    private String language = "en"; // Mặc định là tiếng Anh
 }

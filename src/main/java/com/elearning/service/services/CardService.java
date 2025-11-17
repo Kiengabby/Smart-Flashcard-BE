@@ -35,6 +35,7 @@ public class CardService {
     private final DeckRepository deckRepository;
     private final UserRepository userRepository;
     private final UserCardProgressRepository userCardProgressRepository;
+    private final AudioService audioService;
 
     public CardDTO createCard(Long deckId, CreateCardDTO createCardDTO) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -51,6 +52,10 @@ public class CardService {
         card.setFront(createCardDTO.getFrontText());
         card.setBack(createCardDTO.getBackText());
         card.setDeck(deck);
+        
+        // Tạo âm thanh sử dụng ngôn ngữ từ deck
+        String audioUrl = generateAudioForCard(createCardDTO.getFrontText(), deck.getLanguage());
+        card.setAudioUrl(audioUrl);
         
         Card savedCard = cardRepository.save(card);
         
@@ -83,6 +88,7 @@ public class CardService {
         cardDTO.setId(card.getId());
         cardDTO.setFrontText(card.getFront());
         cardDTO.setBackText(card.getBack());
+        cardDTO.setAudioUrl(card.getAudioUrl());
         
         // Các trường spaced repetition sẽ được lấy từ UserCardProgress
         // Tạm thời set giá trị mặc định
@@ -102,6 +108,7 @@ public class CardService {
         cardDTO.setId(card.getId());
         cardDTO.setFrontText(card.getFront());
         cardDTO.setBackText(card.getBack());
+        cardDTO.setAudioUrl(card.getAudioUrl());
         
         // Lấy tiến độ học tập từ UserCardProgress
         Optional<UserCardProgress> progressOpt = userCardProgressRepository.findByUserAndCard(user, card);
@@ -402,5 +409,47 @@ public class CardService {
         userCardProgressRepository.save(progress);
         
         return mapToCardDTO(card);
+    }
+
+    /**
+     * Tự động tạo âm thanh cho từ vựng
+     */
+    private String generateAudioForCard(String frontText, String deckLanguage) {
+        try {
+            // Sử dụng ngôn ngữ từ deck thay vì auto-detect
+            String language = (deckLanguage != null && !deckLanguage.isEmpty()) ? deckLanguage : "en";
+            
+            // Tạo âm thanh
+            return audioService.generateAudioForText(frontText, language);
+        } catch (Exception e) {
+            // Nếu có lỗi, không làm gián đoạn việc tạo card
+            return null;
+        }
+    }
+
+    /**
+     * Phát hiện ngôn ngữ của text
+     */
+    private String detectLanguage(String text) {
+        // Kiểm tra ký tự tiếng Việt
+        if (text.matches(".*[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ].*")) {
+            return "vi";
+        }
+        // Kiểm tra ký tự tiếng Nhật (Hiragana, Katakana, Kanji)
+        else if (text.matches(".*[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF].*")) {
+            return "ja";
+        }
+        // Kiểm tra ký tự tiếng Hàn
+        else if (text.matches(".*[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F].*")) {
+            return "ko";
+        }
+        // Kiểm tra ký tự tiếng Trung
+        else if (text.matches(".*[\u4E00-\u9FAF].*")) {
+            return "zh";
+        }
+        // Mặc định tiếng Anh
+        else {
+            return "en";
+        }
     }
 }

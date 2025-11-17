@@ -12,5 +12,6 @@ public class DeckDTO {
     private Long id;
     private String name;
     private String description;
+    private String language;
     private Integer cardCount;
 }

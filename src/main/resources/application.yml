@@ -116,3 +116,10 @@ websocket:
   allowed-origins: 
     - http://localhost:4200
     - http://localhost:3000
+
+# Audio Configuration
+app:
+  audio:
+    storage:
+      path: ./audio
+    base-url: http://localhost:8080/api/audio

@@ -32,6 +32,10 @@ public class Deck {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(length = 10)
+    @Builder.Default
+    private String language = "en";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
