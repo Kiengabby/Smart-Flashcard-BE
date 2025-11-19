@@ -27,33 +27,116 @@ public class AudioService {
     @Value("${app.audio.base-url:http://localhost:8080/api/audio}")
     private String audioBaseUrl;
 
-    private final RestTemplate restTemplate;
+    @Value("${app.audio.ai-enabled:true}")
+    private boolean aiEnabled;
 
-    public AudioService(RestTemplate restTemplate) {
+    @Value("${app.audio.default-voice:female}")
+    private String defaultVoice;
+
+    private final RestTemplate restTemplate;
+    private final AITTSService aiTTSService;
+    private final GoogleTTSService googleTTSService;
+
+    public AudioService(RestTemplate restTemplate, AITTSService aiTTSService, GoogleTTSService googleTTSService) {
         this.restTemplate = restTemplate;
+        this.aiTTSService = aiTTSService;
+        this.googleTTSService = googleTTSService;
     }
 
     /**
-     * Tạo âm thanh tự động cho text bằng ResponsiveVoice API
+     * Tạo âm thanh tự động cho text với AI enhancement
      * @param text Văn bản cần chuyển thành âm thanh
      * @param language Ngôn ngữ (en, vi, etc.)
      * @return URL của file âm thanh đã tạo
      */
     public String generateAudioForText(String text, String language) {
+        return generateAudioForText(text, language, defaultVoice);
+    }
+
+    /**
+     * Tạo âm thanh với voice type cụ thể
+     * @param text Văn bản cần chuyển thành âm thanh
+     * @param language Ngôn ngữ (en, vi, etc.)
+     * @param voiceType Loại giọng (female, male, neutral, etc.)
+     * @return URL của file âm thanh đã tạo
+     */
+    public String generateAudioForText(String text, String language, String voiceType) {
         try {
-            // 1. Tạo âm thanh từ ResponsiveVoice API (miễn phí)
+            // 1. Try Google Neural TTS first (best quality with existing API key)
+            if (aiEnabled) {
+                log.info("Generating Google Neural audio for: {} (language: {}, voice: {})", 
+                        text.substring(0, Math.min(30, text.length())), language, voiceType);
+                
+                String googleAudioUrl = googleTTSService.generateGoogleTTSAudio(text, language, voiceType);
+                if (googleAudioUrl != null) {
+                    log.info("✅ Google TTS success: High-quality neural voice");
+                    return googleAudioUrl;
+                }
+                
+                log.warn("Google TTS failed, trying OpenAI TTS...");
+                
+                // 2. Fallback to OpenAI TTS
+                String openaiAudioUrl = aiTTSService.generateAIAudioForText(text, language, voiceType);
+                if (openaiAudioUrl != null) {
+                    log.info("✅ OpenAI TTS success: Premium voice");
+                    return openaiAudioUrl;
+                }
+                
+                log.warn("Both AI TTS failed, falling back to basic TTS");
+            }
+            
+            // 3. Final fallback to ResponsiveVoice API
             String audioData = callTextToSpeechAPI(text, language);
             
-            // 2. Lưu file âm thanh
-            String fileName = saveAudioFile(audioData, text);
-            
-            // 3. Trả về URL public
-            return audioBaseUrl + "/" + fileName;
+            if (audioData != null) {
+                String fileName = saveAudioFile(audioData, text);
+                log.info("✅ Basic TTS fallback used");
+                return audioBaseUrl + "/" + fileName;
+            }
             
         } catch (Exception e) {
             log.error("Lỗi khi tạo âm thanh cho text: {}", text, e);
-            return null;
         }
+        
+        return null;
+    }
+
+    /**
+     * Tạo âm thanh chất lượng cao bằng AI (Google Neural TTS ưu tiên)
+     * @param text Văn bản cần chuyển thành âm thanh
+     * @param language Ngôn ngữ
+     * @param voiceType Loại giọng nói
+     * @return URL của file âm thanh AI premium
+     */
+    public String generatePremiumAudioForText(String text, String language, String voiceType) {
+        if (!aiEnabled) {
+            log.warn("AI TTS is disabled, using standard audio generation");
+            return generateAudioForText(text, language, voiceType);
+        }
+        
+        try {
+            // Priority: Google Neural TTS (using existing Google API key)
+            log.info("🎤 Generating premium neural audio with Google TTS");
+            String googleAudioUrl = googleTTSService.generateGoogleTTSAudio(text, language, voiceType);
+            if (googleAudioUrl != null) {
+                log.info("🚀 Google Neural TTS success: WaveNet quality");
+                return googleAudioUrl;
+            }
+            
+            // Fallback: OpenAI TTS
+            log.info("🔄 Fallback to OpenAI TTS");
+            String openaiAudioUrl = aiTTSService.generateAIAudioForText(text, language, voiceType);
+            if (openaiAudioUrl != null) {
+                log.info("✅ OpenAI TTS success");
+                return openaiAudioUrl;
+            }
+            
+        } catch (Exception e) {
+            log.error("Premium AI audio generation failed: {}", e.getMessage());
+        }
+        
+        // Final fallback to standard generation
+        return generateAudioForText(text, language, voiceType);
     }
 
     /**

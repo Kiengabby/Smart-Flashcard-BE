@@ -123,3 +123,36 @@ app:
     storage:
       path: ./audio
     base-url: http://localhost:8080/api/audio
+    ai-enabled: true  # Enable AI TTS (Google Neural priority, OpenAI fallback)
+    default-voice: female  # Default voice type
+    fallback-enabled: true  # Enable fallback to ResponsiveVoice
+
+# Google Cloud Services Configuration
+google:
+  translate:
+    api:
+      key: AIzaSyDuaUewqzM5HZD7nQ_N03nT89zMwtEbMYk
+      url: https://translation.googleapis.com/language/translate/v2
+  tts:
+    url: https://texttospeech.googleapis.com/v1/text:synthesize
+    enabled: true
+    default-voice: Neural2  # Use Neural voices for best quality
+
+# OpenAI Configuration for AI Translation & TTS
+openai:
+  api:
+    key: # Thêm OpenAI API key để dùng AI TTS
+    url: https://api.openai.com/v1/chat/completions
+  tts:
+    url: https://api.openai.com/v1/audio/speech
+
+# AI Translation Configuration
+ai:
+  translation:
+    gemini:
+      api-key: ${GEMINI_API_KEY:your-gemini-api-key-here}
+      api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+      enabled: true
+    google-translate:
+      enabled: true
+    fallback-mock: true

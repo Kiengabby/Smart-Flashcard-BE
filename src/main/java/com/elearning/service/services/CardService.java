@@ -3,7 +3,8 @@ package com.elearning.service.services;
 import com.elearning.service.dtos.CardDTO;
 import com.elearning.service.dtos.CreateCardDTO;
 import com.elearning.service.dtos.StudyStatsDTO;
-import com.elearning.service.dtos.StudyStatsDTO;
+import com.elearning.service.dtos.BulkCreateCardsRequest;
+import com.elearning.service.dtos.BulkCreateCardsResponse;
 import com.elearning.service.entities.Card;
 import com.elearning.service.entities.Deck;
 import com.elearning.service.entities.User;
@@ -19,12 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +32,7 @@ public class CardService {
     private final UserRepository userRepository;
     private final UserCardProgressRepository userCardProgressRepository;
     private final AudioService audioService;
+    private final TranslationService translationService;
 
     public CardDTO createCard(Long deckId, CreateCardDTO createCardDTO) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -240,7 +237,6 @@ public class CardService {
         System.out.println("Activity dates for streak calculation: " + activityDates);
         
         if (activityDates.isEmpty()) {
-            System.out.println("No activity dates found, streak = 0");
             return 0;
         }
         
@@ -254,7 +250,6 @@ public class CardService {
         System.out.println("Latest activity: " + latestActivity);
         
         if (!latestActivity.equals(today) && !latestActivity.equals(yesterday)) {
-            System.out.println("Latest activity not today or yesterday, streak = 0");
             return 0; // Streak đã bị gián đoạn
         }
         
@@ -451,5 +446,70 @@ public class CardService {
         else {
             return "en";
         }
+    }
+
+    /**
+     * Bulk create cards with AI translation
+     */
+    public BulkCreateCardsResponse createCardsWithTranslation(Long deckId, BulkCreateCardsRequest request) {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bộ thẻ với ID: " + deckId));
+        
+        // Kiểm tra quyền sở hữu
+        if (!deck.getUser().getEmail().equals(currentUserEmail)) {
+            throw new AccessDeniedException("Bạn không có quyền thêm thẻ vào bộ thẻ này");
+        }
+
+        BulkCreateCardsResponse response = new BulkCreateCardsResponse();
+        response.setTotalRequested(request.getWords().size());
+        response.setCreatedCards(new ArrayList<>());
+        response.setFailedCards(new ArrayList<>());
+
+        // Auto-detect source language if requested
+        String sourceLanguage = request.getSourceLanguage();
+        if (request.isAutoDetectLanguage() && !request.getWords().isEmpty()) {
+            sourceLanguage = translationService.detectLanguage(request.getWords().get(0));
+        }
+
+        // Batch translate all words with AI enhancement
+        Map<String, String> translations = translationService.translateBatch(
+            request.getWords(), 
+            sourceLanguage, 
+            request.getTargetLanguage(),
+            request.getContext() != null ? request.getContext() : ""
+        );
+
+        // Create cards for each translation
+        for (String word : request.getWords()) {
+            try {
+                String translation = translations.get(word);
+                if (translation == null || translation.trim().isEmpty()) {
+                    response.getFailedCards().add(new BulkCreateCardsResponse.FailedCardCreation(
+                        word, "Không thể dịch từ này", null
+                    ));
+                    continue;
+                }
+
+                // Create card
+                CreateCardDTO createCardDTO = new CreateCardDTO();
+                createCardDTO.setFrontText(word.trim());
+                createCardDTO.setBackText(translation.trim());
+
+                CardDTO createdCard = createCard(deckId, createCardDTO);
+                response.getCreatedCards().add(createdCard);
+
+            } catch (Exception e) {
+                response.getFailedCards().add(new BulkCreateCardsResponse.FailedCardCreation(
+                    word, "Lỗi khi tạo thẻ: " + e.getMessage(), translations.get(word)
+                ));
+            }
+        }
+
+        response.setSuccessCount(response.getCreatedCards().size());
+        response.setFailureCount(response.getFailedCards().size());
+
+        return response;
     }
 }

@@ -9,8 +9,6 @@ server:
     context-path: /
 
 spring:
-  profiles:
-    active: mysql
   application:
     name: smart-flashcard-service
   
@@ -32,7 +30,9 @@ spring:
 # MYSQL PROFILE CONFIGURATION
 # =============================================================================
 spring:
-  profiles: mysql
+  config:
+    activate:
+      on-profile: mysql
   
   # MySQL Database Configuration
   datasource:
@@ -70,7 +70,9 @@ spring:
 # H2 PROFILE CONFIGURATION (FOR TESTING)
 # =============================================================================
 spring:
-  profiles: h2
+  config:
+    activate:
+      on-profile: h2
   
   # H2 Database Configuration (Development/Testing)
   datasource:
