@@ -1,12 +1,16 @@
 package com.elearning.service.controllers;
 
+import com.elearning.service.dto.BatchTranslateRequest;
+import com.elearning.service.dto.TranslationResultDto;
 import com.elearning.service.services.AITranslationService;
 import com.elearning.service.services.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +85,66 @@ public class TranslationController {
         }
         
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Batch translate without creating cards (for editing step)
+     */
+    @PostMapping("/batch-translate")
+    public ResponseEntity<List<TranslationResultDto>> batchTranslate(
+            @RequestBody BatchTranslateRequest request) {
+        
+        List<TranslationResultDto> results = new ArrayList<>();
+        
+        try {
+            for (String word : request.getWords()) {
+                try {
+                    // Try AI translation first
+                    String translation = aiTranslationService.translateWithAI(
+                        word, 
+                        request.getSourceLanguage(), 
+                        request.getTargetLanguage(), 
+                        request.getContext() != null ? request.getContext() : ""
+                    );
+                    
+                    // If AI translation returns a mock result, fall back to Google Translate
+                    if (translation.contains("(từ tiếng")) {
+                        try {
+                            translation = translationService.translateText(
+                                word, 
+                                request.getSourceLanguage(), 
+                                request.getTargetLanguage()
+                            );
+                        } catch (Exception ex) {
+                            log.warn("Google Translate also failed for word: {}, using AI result", word);
+                        }
+                    }
+                    
+                    results.add(new TranslationResultDto(word, translation, 0.95));
+                } catch (Exception e) {
+                    log.error("Failed to translate word: {}, error: {}", word, e.getMessage());
+                    // Try Google Translate as fallback
+                    try {
+                        String fallbackTranslation = translationService.translateText(
+                            word, 
+                            request.getSourceLanguage(), 
+                            request.getTargetLanguage()
+                        );
+                        results.add(new TranslationResultDto(word, fallbackTranslation, 0.8));
+                    } catch (Exception ex) {
+                        log.error("All translation services failed for word: {}", word);
+                        results.add(new TranslationResultDto(word, "", 0.0));
+                    }
+                }
+            }
+            
+            return ResponseEntity.ok(results);
+            
+        } catch (Exception e) {
+            log.error("Batch translation failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ArrayList<>());
+        }
     }
 
     /**

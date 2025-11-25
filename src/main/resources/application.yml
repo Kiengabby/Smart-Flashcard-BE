@@ -131,7 +131,7 @@ app:
 google:
   translate:
     api:
-      key: AIzaSyDuaUewqzM5HZD7nQ_N03nT89zMwtEbMYk
+      key: AIzaSyC4EceoB2lSjl0kPojRZw3QP9W4ALbaHBg
       url: https://translation.googleapis.com/language/translate/v2
   tts:
     url: https://texttospeech.googleapis.com/v1/text:synthesize
@@ -150,7 +150,7 @@ openai:
 ai:
   translation:
     gemini:
-      api-key: ${GEMINI_API_KEY:your-gemini-api-key-here}
+      api-key: AIzaSyC4EceoB2lSjl0kPojRZw3QP9W4ALbaHBg
       api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
       enabled: true
     google-translate:

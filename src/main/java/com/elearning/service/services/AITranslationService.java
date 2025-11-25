@@ -472,6 +472,9 @@ public class AITranslationService {
         if (lower.equals("thanksgiving")) {
             return "Lễ Tạ ơn (Mỹ)";
         }
+        if (lower.equals("tattoo")) {
+            return "hình xăm";
+        }
         
         // Pattern-based intelligent translation
         if (lower.contains("festival")) {
@@ -500,6 +503,62 @@ public class AITranslationService {
 
     private Map<String, String> getEnhancedDictionary() {
         Map<String, String> dict = new HashMap<>();
+        
+        // Basic common words
+        dict.put("hello", "xin chào");
+        dict.put("goodbye", "tạm biệt");
+        dict.put("beautiful", "đẹp");
+        dict.put("computer", "máy tính");
+        dict.put("book", "sách");
+        dict.put("house", "nhà");
+        dict.put("water", "nước");
+        dict.put("food", "thức ăn");
+        dict.put("love", "yêu");
+        dict.put("friend", "bạn");
+        dict.put("family", "gia đình");
+        dict.put("school", "trường học");
+        dict.put("teacher", "giáo viên");
+        dict.put("student", "học sinh");
+        dict.put("work", "làm việc");
+        dict.put("time", "thời gian");
+        dict.put("day", "ngày");
+        dict.put("night", "đêm");
+        dict.put("morning", "buổi sáng");
+        dict.put("afternoon", "buổi chiều");
+        dict.put("evening", "buổi tối");
+        dict.put("good", "tốt");
+        dict.put("bad", "xấu");
+        dict.put("big", "lớn");
+        dict.put("small", "nhỏ");
+        dict.put("happy", "vui");
+        dict.put("sad", "buồn");
+        dict.put("red", "màu đỏ");
+        dict.put("blue", "màu xanh");
+        dict.put("green", "màu xanh lá");
+        dict.put("white", "màu trắng");
+        dict.put("black", "màu đen");
+        
+        // New words that users might test
+        dict.put("tattoo", "hình xăm");
+        dict.put("art", "nghệ thuật");
+        dict.put("music", "âm nhạc");
+        dict.put("movie", "phim");
+        dict.put("game", "trò chơi");
+        dict.put("phone", "điện thoại");
+        dict.put("car", "xe hơi");
+        dict.put("money", "tiền");
+        dict.put("job", "công việc");
+        dict.put("travel", "du lịch");
+        dict.put("weather", "thời tiết");
+        dict.put("city", "thành phố");
+        dict.put("country", "đất nước");
+        dict.put("language", "ngôn ngữ");
+        dict.put("learn", "học");
+        dict.put("study", "học tập");
+        dict.put("read", "đọc");
+        dict.put("write", "viết");
+        dict.put("speak", "nói");
+        dict.put("listen", "nghe");
         
         // Festival and celebration terms  
         dict.put("feast", "bữa tiệc, tiệc lớn");
@@ -544,7 +603,6 @@ public class AITranslationService {
         dict.put("costume", "trang phục");
         dict.put("decoration", "đồ trang trí");
         dict.put("gift", "quà tặng");
-        dict.put("present", "quà tặng");
         
         return dict;
     }

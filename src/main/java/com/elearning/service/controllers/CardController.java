@@ -1,5 +1,6 @@
 package com.elearning.service.controllers;
 
+import com.elearning.service.dto.CardTranslationData;
 import com.elearning.service.dtos.CardDTO;
 import com.elearning.service.dtos.CreateCardDTO;
 import com.elearning.service.dtos.ReviewCardRequest;
@@ -65,6 +66,14 @@ public class CardController {
             @PathVariable Long deckId,
             @RequestBody @Valid BulkCreateCardsRequest request) {
         BulkCreateCardsResponse response = cardService.createCardsWithTranslation(deckId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/create-from-translations")
+    public ResponseEntity<BulkCreateCardsResponse> createCardsFromTranslations(
+            @PathVariable Long deckId,
+            @RequestBody List<CardTranslationData> cardsData) {
+        BulkCreateCardsResponse response = cardService.createCardsFromTranslations(deckId, cardsData);
         return ResponseEntity.ok(response);
     }
 }

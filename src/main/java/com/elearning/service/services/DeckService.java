@@ -81,24 +81,9 @@ public class DeckService {
     }
 
     public DeckDTO createDeck(CreateDeckDTO request) {
-        // Yêu cầu Copilot: Viết logic hoàn chỉnh cho phương thức createDeck.
-        // Bối cảnh: Phương thức này được gọi bởi DeckController khi người dùng muốn tạo một bộ thẻ mới.
-        //
-        // Luồng xử lý chi tiết như sau:
-        // 1. Lấy thông tin người dùng đang đăng nhập:
-        //    - Sử dụng SecurityContextHolder để lấy Authentication object.
-        //    - Từ đó, lấy ra email của người dùng (chính là username).
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        // 2. Tìm đối tượng User trong CSDL:
-        //    - Dùng userRepository.findByEmail(email) để tìm.
-        //    - Nếu không tìm thấy, ném ra một ngoại lệ UsernameNotFoundException với thông báo "User not found".
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        
-        // 3. Tạo và ánh xạ dữ liệu:
-        //    - Khởi tạo một đối tượng Deck mới.
-        //    - Sử dụng ModelMapper để ánh xạ các thuộc tính từ 'request' (CreateDeckDTO) sang đối tượng Deck vừa tạo.
         Deck deck = new Deck();
         modelMapper.map(request, deck);
         

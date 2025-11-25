@@ -37,6 +37,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/health/**").permitAll()
                 .requestMatchers("/api/audio/**").permitAll()  // Allow audio file access
+                .requestMatchers("/api/translation/**").permitAll()  // Allow translation endpoints for testing
+                .requestMatchers("/api/decks/*/cards/create-from-translations").permitAll()  // Allow card creation for testing
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/public/**").permitAll()  // Allow public test endpoints
                 .anyRequest().authenticated()

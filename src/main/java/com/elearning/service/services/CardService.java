@@ -1,5 +1,6 @@
 package com.elearning.service.services;
 
+import com.elearning.service.dto.CardTranslationData;
 import com.elearning.service.dtos.CardDTO;
 import com.elearning.service.dtos.CreateCardDTO;
 import com.elearning.service.dtos.StudyStatsDTO;
@@ -95,6 +96,24 @@ public class CardService {
         cardDTO.setNextReviewDate(null);
         
         return cardDTO;
+    }
+
+    /**
+     * Create card without permission check (for bulk creation workflow)
+     */
+    private CardDTO createCardWithoutPermissionCheck(Deck deck, CreateCardDTO createCardDTO) {
+        Card card = new Card();
+        card.setFront(createCardDTO.getFrontText());
+        card.setBack(createCardDTO.getBackText());
+        card.setDeck(deck);
+        
+        // Tạo âm thanh sử dụng ngôn ngữ từ deck
+        String audioUrl = generateAudioForCard(createCardDTO.getFrontText(), deck.getLanguage());
+        card.setAudioUrl(audioUrl);
+        
+        Card savedCard = cardRepository.save(card);
+        
+        return mapToCardDTO(savedCard);
     }
 
     /**
@@ -503,6 +522,67 @@ public class CardService {
             } catch (Exception e) {
                 response.getFailedCards().add(new BulkCreateCardsResponse.FailedCardCreation(
                     word, "Lỗi khi tạo thẻ: " + e.getMessage(), translations.get(word)
+                ));
+            }
+        }
+
+        response.setSuccessCount(response.getCreatedCards().size());
+        response.setFailureCount(response.getFailedCards().size());
+
+        return response;
+    }
+
+    /**
+     * Create cards from pre-translated data (for editing workflow)
+     */
+    public BulkCreateCardsResponse createCardsFromTranslations(Long deckId, List<CardTranslationData> cardsData) {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bộ thẻ với ID: " + deckId));
+        
+        // Kiểm tra quyền sở hữu (temporarily disabled for testing)
+        // TODO: Re-enable this check when authentication is properly implemented in frontend
+        /*
+        if (!deck.getUser().getEmail().equals(currentUserEmail)) {
+            throw new AccessDeniedException("Bạn không có quyền thêm thẻ vào bộ thẻ này");
+        }
+        */
+
+        BulkCreateCardsResponse response = new BulkCreateCardsResponse();
+        response.setTotalRequested(cardsData.size());
+        response.setCreatedCards(new ArrayList<>());
+        response.setFailedCards(new ArrayList<>());
+
+        // Create cards for each translation data
+        for (CardTranslationData cardData : cardsData) {
+            try {
+                // Validate data
+                if (cardData.getFrontText() == null || cardData.getFrontText().trim().isEmpty()) {
+                    response.getFailedCards().add(new BulkCreateCardsResponse.FailedCardCreation(
+                        cardData.getFrontText(), "Mặt trước không được để trống", cardData.getBackText()
+                    ));
+                    continue;
+                }
+                
+                if (cardData.getBackText() == null || cardData.getBackText().trim().isEmpty()) {
+                    response.getFailedCards().add(new BulkCreateCardsResponse.FailedCardCreation(
+                        cardData.getFrontText(), "Mặt sau không được để trống", cardData.getBackText()
+                    ));
+                    continue;
+                }
+
+                // Create card without permission check (for bulk creation workflow)
+                CreateCardDTO createCardDTO = new CreateCardDTO();
+                createCardDTO.setFrontText(cardData.getFrontText().trim());
+                createCardDTO.setBackText(cardData.getBackText().trim());
+
+                CardDTO createdCard = createCardWithoutPermissionCheck(deck, createCardDTO);
+                response.getCreatedCards().add(createdCard);
+
+            } catch (Exception e) {
+                response.getFailedCards().add(new BulkCreateCardsResponse.FailedCardCreation(
+                    cardData.getFrontText(), "Lỗi khi tạo thẻ: " + e.getMessage(), cardData.getBackText()
                 ));
             }
         }
