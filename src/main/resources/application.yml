@@ -1,1 +1,110 @@
-n
+# =============================================================================
+# APPLICATION CONFIGURATION - MAIN
+# Smart Flashcard Platform - Graduation Project  
+# =============================================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: smart-flashcard-service
+  
+  profiles:
+    active: mysql
+
+  mvc:
+    path-match:
+      matching-strategy: ant_path_matcher
+  
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    date-format: yyyy-MM-dd HH:mm:ss
+
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+# =============================================================================
+# MYSQL DATABASE CONFIGURATION
+# =============================================================================
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/smart_flashcard?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: root
+    password: 123456
+    hikari:
+      idle-timeout: 30000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      pool-name: HikariPoolSmartFlashcard
+      connection-test-query: SELECT 1
+      validation-timeout: 3000
+  
+  # JPA/Hibernate Configuration for MySQL
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# =============================================================================
+# SECURITY & JWT CONFIGURATION
+# =============================================================================
+jwt:
+  secret: mySecretKey
+  expiration: 86400000
+
+# =============================================================================  
+# AI SERVICES CONFIGURATION
+# =============================================================================
+ai:
+  translation:
+    gemini:
+      api-key: AIzaSyBvNTrAoZHDlCMNqQejNLPx0ykYL4dYNw0
+      api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+      enabled: true
+
+# =============================================================================
+# CORS CONFIGURATION
+# =============================================================================
+cors:
+  allowed-origins: 
+    - http://localhost:4200
+    - http://localhost:4201
+    - http://localhost:4202
+    - http://localhost:4203
+    - http://localhost:4204
+    - http://localhost:4205
+    - http://localhost:4206
+    - http://localhost:4207
+    - http://localhost:4208
+    - http://localhost:4209
+    - http://localhost:4210
+  allowed-methods:
+    - GET
+    - POST 
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  allow-credentials: true
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+logging:
+  level:
+    com.elearning: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: ERROR
+    org.hibernate.type.descriptor.sql.BasicBinder: ERROR

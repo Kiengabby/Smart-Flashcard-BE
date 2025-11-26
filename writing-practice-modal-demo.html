@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing Practice với Modal Đánh Giá</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .practice-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            margin-top: 50px;
+        }
+        
+        .word-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 15px 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 25px 30px;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .score-display {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .score-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .feedback-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feedback-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .positive-points {
+            border-left-color: #28a745;
+        }
+        
+        .improvement-areas {
+            border-left-color: #ffc107;
+        }
+        
+        .grammar-check {
+            border-left-color: #17a2b8;
+        }
+        
+        .feedback-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .feedback-list li {
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        .vocabulary-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .level-beginner { background: #e3f2fd; color: #1976d2; }
+        .level-intermediate { background: #fff3e0; color: #f57c00; }
+        .level-advanced { background: #e8f5e8; color: #388e3c; }
+        
+        .correct-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .correct-indicator.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .correct-indicator.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="practice-card">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-pen-fancy text-primary me-3"></i>
+                Writing Practice với Modal Đánh Giá
+            </h1>
+            
+            <div class="word-display">
+                <h3 class="mb-2">Từ cần luyện tập</h3>
+                <h1 class="mb-2" id="currentWord">change</h1>
+                <p class="mb-0" id="currentMeaning">thay đổi</p>
+            </div>
+            
+            <form id="writingForm">
+                <div class="mb-4">
+                    <label for="userSentence" class="form-label fw-bold">
+                        <i class="fas fa-edit me-2"></i>Viết câu sử dụng từ này:
+                    </label>
+                    <textarea 
+                        class="form-control" 
+                        id="userSentence" 
+                        rows="4" 
+                        placeholder="Nhập câu của bạn tại đây..."
+                        required></textarea>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check-circle me-2"></i>Kiểm tra câu trả lời
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-outline-primary" onclick="getExample()">
+                    <i class="fas fa-lightbulb me-2"></i>Xem ví dụ
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Đánh Giá -->
+    <div class="modal fade" id="evaluationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-star me-2"></i>Đánh Giá Câu Trả Lời
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Đóng
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="tryAgain()">
+                        <i class="fas fa-redo me-2"></i>Thử lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api/writing-practice';
+        
+        document.getElementById('writingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            evaluateSentence();
+        });
+        
+        async function evaluateSentence() {
+            const word = document.getElementById('currentWord').textContent;
+            const meaning = document.getElementById('currentMeaning').textContent;
+            const sentence = document.getElementById('userSentence').value.trim();
+            
+            if (!sentence) {
+                alert('Vui lòng nhập câu của bạn!');
+                return;
+            }
+            
+            // Show loading in modal
+            showLoadingModal();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/evaluate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer fake-token' // For demo
+                    },
+                    body: JSON.stringify({
+                        word: word,
+                        meaning: meaning,
+                        sentence: sentence
+                    })
+                });
+                
+                const feedback = await response.json();
+                showEvaluationModal(feedback, word, sentence);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorModal();
+            }
+        }
+        
+        function showLoadingModal() {
+            const modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+            document.getElementById('modalContent').innerHTML = `
+                <div class="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Đang đánh giá câu của bạn...</p>
+                </div>
+            `;
+            modal.show();
+        }
+        
+        function showEvaluationModal(feedback, word, sentence) {
+            const correctnessClass = feedback.isCorrect ? 'correct' : 'incorrect';
+            const correctnessIcon = feedback.isCorrect ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            const correctnessText = feedback.isCorrect ? 'Câu đúng!' : 'Cần cải thiện';
+            
+            const levelClass = feedback.vocabularyLevel.toLowerCase();
+            
+            const content = `
+                <div class="score-display">
+                    <span class="score-number">${feedback.score}/10</span>
+                    <div>Điểm số của bạn</div>
+                </div>
+                
+                <div class="correct-indicator ${correctnessClass}">
+                    <i class="fas ${correctnessIcon}"></i>
+                    <strong>${correctnessText}</strong>
+                </div>
+                
+                <div class="feedback-section">
+                    <div class="feedback-title">
+                        <i class="fas fa-comment-alt"></i>
+                        Nhận xét chung
+                    </div>
+                    <p class="mb-0">${feedback.suggestion}</p>
+                </div>
+                
+                ${feedback.positivePoints && feedback.positivePoints.length > 0 ? `
+                <div class="feedback-section positive-points">
+                    <div class="feedback-title">
+                        <i class="fas fa-thumbs-up"></i>
+                        Điểm mạnh
+                    </div>
+                    <ul class="feedback-list">
+                        ${feedback.positivePoints.map(point => `<li>${point}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                
+                ${feedback.improvementAreas && feedback.improvementAreas.length > 0 ? `
+                <div class="feedback-section improvement-areas">
+                    <div class="feedback-title">
+                        <i class="fas fa-arrow-up"></i>
+                        Cần cải thiện
+                    </div>
+                    <ul class="feedback-list">
+                        ${feedback.improvementAreas.map(area => `<li>${area}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                
+                <div class="feedback-section grammar-check">
+                    <div class="feedback-title">
+                        <i class="fas fa-spell-check"></i>
+                        Phân tích ngữ pháp
+                    </div>
+                    <p class="mb-0">${feedback.grammarCheck}</p>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <span class="vocabulary-badge level-${levelClass}">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Mức độ: ${feedback.vocabularyLevel}
+                    </span>
+                </div>
+                
+                <div class="mt-3 p-3 bg-light rounded">
+                    <small class="text-muted">
+                        <strong>Câu của bạn:</strong> "${sentence}"<br>
+                        <strong>Từ được luyện tập:</strong> ${word}
+                    </small>
+                </div>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = content;
+        }
+        
+        function showErrorModal() {
+            const content = `
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                    <h4 class="mt-3">Có lỗi xảy ra</h4>
+                    <p>Không thể đánh giá câu của bạn lúc này. Vui lòng thử lại!</p>
+                </div>
+            `;
+            document.getElementById('modalContent').innerHTML = content;
+        }
+        
+        function tryAgain() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('evaluationModal'));
+            modal.hide();
+            document.getElementById('userSentence').focus();
+        }
+        
+        async function getExample() {
+            const word = document.getElementById('currentWord').textContent;
+            const meaning = document.getElementById('currentMeaning').textContent;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/example`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer fake-token'
+                    },
+                    body: JSON.stringify({
+                        word: word,
+                        meaning: meaning
+                    })
+                });
+                
+                const data = await response.json();
+                
+                alert(`Ví dụ: ${data.exampleSentence}\\n\\nDịch: ${data.explanation}`);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Không thể lấy ví dụ lúc này. Vui lòng thử lại!');
+            }
+        }
+        
+        // Demo: Change word dynamically
+        const words = [
+            {word: 'change', meaning: 'thay đổi'},
+            {word: 'learn', meaning: 'học tập'},
+            {word: 'create', meaning: 'tạo ra'},
+            {word: 'improve', meaning: 'cải thiện'},
+            {word: 'practice', meaning: 'luyện tập'}
+        ];
+        
+        let currentWordIndex = 0;
+        
+        function changeWord() {
+            currentWordIndex = (currentWordIndex + 1) % words.length;
+            const currentWordData = words[currentWordIndex];
+            document.getElementById('currentWord').textContent = currentWordData.word;
+            document.getElementById('currentMeaning').textContent = currentWordData.meaning;
+            document.getElementById('userSentence').value = '';
+        }
+        
+        // Add change word button
+        document.querySelector('.practice-card').insertAdjacentHTML('beforeend', `
+            <div class="text-center mt-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeWord()">
+                    <i class="fas fa-random me-2"></i>Đổi từ khác
+                </button>
+            </div>
+        `);
+    </script>
+</body>
+</html>

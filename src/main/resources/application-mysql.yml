@@ -67,37 +67,6 @@ spring:
 
 ---
 # =============================================================================
-# H2 PROFILE CONFIGURATION (FOR TESTING)
-# =============================================================================
-spring:
-  config:
-    activate:
-      on-profile: h2
-  
-  # H2 Database Configuration (Development/Testing)
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:./data/smartflashcard;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-  
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  
-  # JPA/Hibernate Configuration for H2
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
----
-# =============================================================================
 # COMMON CONFIGURATION (ALL PROFILES)
 # =============================================================================
 
