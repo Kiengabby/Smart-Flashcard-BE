@@ -68,7 +68,7 @@ jwt:
 ai:
   translation:
     gemini:
-      api-key: AIzaSyBvNTrAoZHDlCMNqQejNLPx0ykYL4dYNw0
+      api-key: ${GOOGLE_API_KEY:your_api_key_here}
       api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
       enabled: true
 

@@ -9,6 +9,45 @@ This document outlines how to properly configure API keys after the security inc
 - GitHub detected and reported the exposed key  
 - Key has been removed and replaced with environment variables
 
+## ✅ Quick Setup Instructions
+
+### 1. Create .env file
+Create a `.env` file in the root directory:
+
+```env
+# Google API Configuration
+GOOGLE_API_KEY=AIzaSyBvNTrAoZHDlCMNqQejNLPx0ykYL4dYNw0
+```
+
+### 2. Verify application.yml
+Ensure `application.yml` uses environment variables:
+
+```yaml
+ai:
+  translation:
+    gemini:
+      api-key: ${GOOGLE_API_KEY:your_api_key_here}
+```
+
+### 3. Run the application
+```bash
+mvn spring-boot:run
+```
+
+## 🛡️ Security Best Practices
+
+- ✅ `.env` file is in `.gitignore`
+- ✅ Use environment variables for sensitive data
+- ✅ Template file `application-example.yml` created
+- ❌ Never commit API keys to Git
+
+## 🔄 For Future Development
+
+1. Always use environment variables for secrets
+2. Use placeholder values in committed config files
+3. Document required environment variables
+4. Regularly rotate API keys
+
 ### 🔧 Setup Instructions
 
 #### 1. Create Environment Variables
