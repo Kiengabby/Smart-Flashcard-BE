@@ -40,6 +40,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/translation/**").permitAll()  // Allow translation endpoints for testing
                 .requestMatchers("/api/decks/*/cards/create-from-translations").permitAll()  // Allow card creation for testing
                 .requestMatchers("/api/writing-practice/**").permitAll()  // Allow writing practice for testing
+                .requestMatchers("/api/learning-progress/**").permitAll()  // Allow learning progress for testing
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/public/**").permitAll()  // Allow public test endpoints
                 .anyRequest().authenticated()
