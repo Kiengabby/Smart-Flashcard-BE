@@ -35,7 +35,7 @@ public class PublicTestController {
             
             response.put("word", word);
             response.put("translation", translation);
-            response.put("service", "Enhanced Mock Translation");
+            response.put("service", "Google Gemini Pro API");
             response.put("success", true);
             response.put("timestamp", System.currentTimeMillis());
             
@@ -71,7 +71,7 @@ public class PublicTestController {
             
             response.put("input_words", words);
             response.put("translations", translations);
-            response.put("service", "Enhanced Mock Batch Translation");
+            response.put("service", "Google Gemini Pro API - Batch");
             response.put("success", true);
             response.put("count", translations.size());
             response.put("timestamp", System.currentTimeMillis());
