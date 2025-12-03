@@ -77,5 +77,5 @@ cloudinary-config/
 *.pem
 *.key
 *.crt
-# Scripts with sensitive data
-set-api-key.sh
+# Scripts with sensitive data - NOW SAFE (no hardcoded keys)
+# set-api-key.sh - REMOVED from .gitignore, now interactive prompt only
