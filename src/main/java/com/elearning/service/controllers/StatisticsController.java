@@ -32,4 +32,16 @@ public class StatisticsController {
         java.util.List<Integer> activityDates = cardService.getActivityDatesInMonth(year, month);
         return ResponseEntity.ok(activityDates);
     }
+    
+    /**
+     * Lấy calendar activity data với review counts
+     */
+    @GetMapping("/calendar-activity")
+    public ResponseEntity<java.util.List<com.elearning.service.dtos.CalendarActivityDTO>> getCalendarActivity(
+            @RequestParam int year, 
+            @RequestParam int month) {
+        java.util.List<com.elearning.service.dtos.CalendarActivityDTO> activityData = 
+                cardService.getCalendarActivityData(year, month);
+        return ResponseEntity.ok(activityData);
+    }
 }

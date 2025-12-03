@@ -17,4 +17,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     
     @Query("SELECT COUNT(c) FROM Card c WHERE c.deck.user = :user")
     long countByDeck_User(@Param("user") User user);
+    
+    // Delete methods for cascade deletion
+    void deleteByDeckId(Long deckId);
 }

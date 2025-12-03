@@ -6,12 +6,16 @@ import com.elearning.service.entities.Deck;
 import com.elearning.service.entities.User;
 import com.elearning.service.repositories.DeckRepository;
 import com.elearning.service.repositories.UserRepository;
+import com.elearning.service.repositories.ReviewHistoryRepository;
+import com.elearning.service.repositories.SpacedRepetitionRepository;
+import com.elearning.service.repositories.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +27,9 @@ public class DeckService {
     private final DeckRepository deckRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final ReviewHistoryRepository reviewHistoryRepository;
+    private final SpacedRepetitionRepository spacedRepetitionRepository;
+    private final CardRepository cardRepository;
 
     public List<DeckDTO> getDecksForCurrentUser() {
         // Yêu cầu Copilot: Viết logic hoàn chỉnh cho phương thức getDecksForCurrentUser.
@@ -131,8 +138,28 @@ public class DeckService {
         return deckDTO;
     }
 
+    @Transactional
     public void deleteDeck(Long deckId) {
-        getAndVerifyDeckOwnership(deckId);
+        // Verify ownership first
+        Deck deck = getAndVerifyDeckOwnership(deckId);
+        
+        // Get all card IDs in this deck
+        List<Long> cardIds = deck.getCards().stream()
+                .map(card -> card.getId())
+                .collect(Collectors.toList());
+        
+        if (!cardIds.isEmpty()) {
+            // Step 1: Delete review_history first (has FK to cards)
+            reviewHistoryRepository.deleteByCardIdIn(cardIds);
+            
+            // Step 2: Delete spaced_repetition (has FK to cards)
+            spacedRepetitionRepository.deleteByCardIdIn(cardIds);
+            
+            // Step 3: Delete cards (has FK to deck)
+            cardRepository.deleteByDeckId(deckId);
+        }
+        
+        // Step 4: Finally delete the deck
         deckRepository.deleteById(deckId);
     }
 }

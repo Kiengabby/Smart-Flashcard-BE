@@ -34,6 +34,7 @@ public class CardService {
     private final UserCardProgressRepository userCardProgressRepository;
     private final AudioService audioService;
     private final TranslationService translationService;
+    private final com.elearning.service.repositories.ReviewHistoryRepository reviewHistoryRepository;
 
     public CardDTO createCard(Long deckId, CreateCardDTO createCardDTO) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -340,6 +341,7 @@ public class CardService {
     
     /**
      * Lấy các ngày có hoạt động học tập trong tháng cho user hiện tại
+     * Sử dụng dữ liệu THẬT từ review_history table
      */
     public java.util.List<Integer> getActivityDatesInMonth(int year, int month) {
         User currentUser = getCurrentUser();
@@ -348,14 +350,57 @@ public class CardService {
         java.time.LocalDate startOfMonth = java.time.LocalDate.of(year, month, 1);
         java.time.LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
         
-        // Query để lấy các ngày có activity từ UserCardProgress
-        java.util.List<java.time.LocalDate> activityDates = userCardProgressRepository
-                .findDistinctActivityDatesByUserInMonth(currentUser, startOfMonth, endOfMonth);
+        // Query để lấy các ngày có review activity từ ReviewHistory table
+        java.util.List<java.time.LocalDate> activityDates = reviewHistoryRepository
+                .findDistinctReviewDatesByUserIdInMonth(currentUser.getId(), startOfMonth, endOfMonth);
         
         // Chuyển đổi thành list các ngày trong tháng
         return activityDates.stream()
                 .map(java.time.LocalDate::getDayOfMonth)
                 .collect(java.util.stream.Collectors.toList());
+    }
+    
+    /**
+     * Lấy calendar activity data với review counts cho mỗi ngày
+     * Trả về THẬT dữ liệu từ review_history table
+     */
+    public java.util.List<com.elearning.service.dtos.CalendarActivityDTO> getCalendarActivityData(int year, int month) {
+        User currentUser = getCurrentUser();
+        
+        // Tạo LocalDate cho đầu và cuối tháng
+        java.time.LocalDate startOfMonth = java.time.LocalDate.of(year, month, 1);
+        java.time.LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+        
+        // Lấy tất cả ngày có review activity
+        java.util.List<java.time.LocalDate> activityDates = reviewHistoryRepository
+                .findDistinctReviewDatesByUserIdInMonth(currentUser.getId(), startOfMonth, endOfMonth);
+        
+        // Tạo CalendarActivityDTO cho mỗi ngày
+        return activityDates.stream()
+                .map(date -> {
+                    Long reviewCount = reviewHistoryRepository.countByUserIdAndReviewDate(
+                            currentUser.getId(), date);
+                    
+                    // Tính activity level dựa trên số reviews
+                    int activityLevel = calculateActivityLevel(reviewCount.intValue());
+                    
+                    return com.elearning.service.dtos.CalendarActivityDTO.builder()
+                            .day(date.getDayOfMonth())
+                            .reviewCount(reviewCount.intValue())
+                            .activityLevel(activityLevel)
+                            .build();
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
+    
+    /**
+     * Tính activity level dựa trên số lượng reviews
+     */
+    private int calculateActivityLevel(int reviewCount) {
+        if (reviewCount == 0) return 0;
+        if (reviewCount <= 5) return 1;
+        if (reviewCount <= 15) return 2;
+        return 3; // 16+ reviews
     }
 
     /**

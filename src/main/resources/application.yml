@@ -68,7 +68,15 @@ jwt:
 ai:
   translation:
     gemini:
-      api-key: ${GOOGLE_API_KEY:your_api_key_here}
+      # SECURITY: API key must be set via environment variable
+      # DO NOT commit hardcoded API key to Git!
+      # Get your API key from: https://aistudio.google.com/app/apikey
+      # 
+      # To set the environment variable:
+      # 1. Run: export GOOGLE_API_KEY="your-api-key-here"
+      # 2. Or add to ~/.zshrc: export GOOGLE_API_KEY="your-api-key-here"
+      # 3. Or use the provided script: ./set-api-key.sh
+      api-key: ${GOOGLE_API_KEY}
       api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
       enabled: true
 
