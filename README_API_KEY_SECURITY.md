@@ -13,7 +13,7 @@ Document này hướng dẫn cách **bảo mật API key** và setup biến môi
 ❌ **Hardcode API key trong code**
 ```java
 // ❌ WRONG - API key sẽ bị commit lên Git
-private String apiKey = "AIzaSyCKOw0mavWVQfek9UawoVQVb_kwzAy3GM4";
+private String apiKey = "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 ```
 
 ❌ **Hardcode API key trong application.yml**
@@ -22,7 +22,7 @@ private String apiKey = "AIzaSyCKOw0mavWVQfek9UawoVQVb_kwzAy3GM4";
 ai:
   translation:
     gemini:
-      api-key: AIzaSyCKOw0mavWVQfek9UawoVQVb_kwzAy3GM4
+      api-key: AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ❌ **Commit .env file lên Git**
@@ -57,7 +57,7 @@ ai:
 GOOGLE_API_KEY=your_api_key_here
 
 # .env - Never commit
-GOOGLE_API_KEY=AIzaSyCKOw0mavWVQfek9UawoVQVb_kwzAy3GM4
+GOOGLE_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ---
@@ -97,7 +97,7 @@ cd /Users/manhkien/Documents/DATN_HMK/Smart-Flashcard-BE
 **Option A: Permanent (Khuyên dùng)**
 ```bash
 # Thêm vào ~/.zshrc
-echo 'export GOOGLE_API_KEY="AIzaSyCKOw0mavWVQfek9UawoVQVb_kwzAy3GM4"' >> ~/.zshrc
+echo 'export GOOGLE_API_KEY="YOUR_ACTUAL_API_KEY_HERE"' >> ~/.zshrc
 
 # Apply ngay lập tức
 source ~/.zshrc
@@ -109,7 +109,7 @@ echo $GOOGLE_API_KEY
 **Option B: Temporary (Chỉ cho session hiện tại)**
 ```bash
 # Set cho terminal hiện tại
-export GOOGLE_API_KEY="AIzaSyCKOw0mavWVQfek9UawoVQVb_kwzAy3GM4"
+export GOOGLE_API_KEY="YOUR_ACTUAL_API_KEY_HERE"
 
 # Kiểm tra
 echo $GOOGLE_API_KEY
